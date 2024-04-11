@@ -4,7 +4,7 @@ use clap::Parser;
 use photosort::{gather_entries, process_files};
 
 #[derive(Parser)]
-#[command(version, about="A program to sort your photo/video files into folders based on their creation date", long_about="")]
+#[command(version, about="A quick tool to sort your photo/video files into folders based on their creation date", long_about="")]
 struct Cli {
     #[arg(default_value=".", help="The path where the files to sort are located")]
     path: PathBuf,
