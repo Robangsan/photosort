@@ -30,7 +30,7 @@ pub fn process_files(entries: Vec<DirEntry>, subfolder: bool) -> Result<(), std:
             .is_ok()
             .then(|| DirBuilder::new().recursive(true).create(&new_path));
 
-        rename(i.path(), &new_path.join(i.file_name())).expect("Error al mover la foto");
+        rename(i.path(), &new_path.join(i.file_name())).expect("Error while moving file");
     })
 }
 
@@ -49,7 +49,7 @@ pub fn gather_entries(path: PathBuf, recursive: bool, exts: &Vec<String>) -> Res
 
 fn parse_date_from_str(strdate: &str) -> DateTime<Utc> {
     NaiveDateTime::parse_from_str(strdate, "%Y-%m-%d %H:%M:%S")
-        .expect("Error leyendo fecha de la foto")
+        .expect("Error while reading date")
         .and_utc()
 }
 
@@ -58,7 +58,7 @@ fn parse_date_from_duration(duration: &Duration) -> DateTime<Utc> {
         duration
             .as_secs()
             .try_into()
-            .expect("Error leyendo fecha de la foto"),
+            .expect("Error while reading date"),
         0,
     )
     .unwrap()
@@ -77,7 +77,7 @@ fn get_date_from_file(file: &DirEntry) -> DateTime<Utc> {
         &file
             .path()
             .metadata()
-            .expect("Error leyendo metadatos del fichero")
+            .expect("Error while reading file metadata")
             .created()
             .unwrap()
             .duration_since(SystemTime::UNIX_EPOCH)
