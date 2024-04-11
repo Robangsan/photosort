@@ -9,15 +9,22 @@ The `photosort` command will, by default, sort all photo and video files in the 
 * MP4
 * AVI
 
+The input folder can be specified by passing it as an argument:
+```
+photosort input_folder
+```
+
 These can be specified with the `-e` option, adding one for each extension. For instance:
 ```
 photosort -e jpg -e bmp -e webm
 ```
 
-The path where the tool will look for files can be passed as an argument, like this:
+The output folder is the same as the input by default, unless another one is specified with the `-o` option.
 ```
-photosort dir\another_dir
+photosort input_folder -o output_folder
 ```
+
+The files can be copied instead of moved if the `-c` option is passed.
 
 By default, the tool will sort the files into folders with the year of their creation (e.g. if the photo was created in 2020, it will be moved into the `\2020\`  folder). An additional layer of sorting can be added where the files will be distributed into subfolders using the `-s` option (e.g. if the photo was created in March 2020, it will be moved into the `\2020\3\` folder).
 
@@ -25,4 +32,4 @@ The tool will look for files only in the specified folder, unless the `-r` optio
 
 You can see all the available options with `photosort -h` or `photosort --help`.
 
-**CAUTION: This application is in alpha state and is largely UNTESTED. I'm not responsible for any data loss that may occur because of its usage. Use at your own risk!**
+### **CAUTION: This application is in alpha state and is largely UNTESTED. I'm not responsible for any data loss that may occur because of its usage. Use at your own risk!**

@@ -1,14 +1,20 @@
 use std::{
-    fs::{read_dir, rename, DirBuilder, DirEntry, File},
+    fs::{self, read_dir, DirBuilder, DirEntry, File},
     io::BufReader,
-    path::{Path, PathBuf},
+    path::PathBuf,
     time::{Duration, SystemTime},
 };
 
 use chrono::{DateTime, Datelike, NaiveDateTime, Utc};
 use exif::{In, Tag};
 
-pub fn process_files(entries: Vec<DirEntry>, subfolder: bool) -> Result<(), std::io::Error> {
+pub fn process_files(
+    entries: Vec<DirEntry>,
+    subfolder: bool,
+    path: PathBuf,
+    output: Option<PathBuf>,
+    copy: bool,
+) -> Result<(), std::io::Error> {
     let exif_reader = exif::Reader::new();
     Ok(for i in entries {
         let mut file_reader = BufReader::new(File::open(i.path())?);
@@ -20,9 +26,18 @@ pub fn process_files(entries: Vec<DirEntry>, subfolder: bool) -> Result<(), std:
             Err(_) => get_date_from_file(&i),
         };
 
+        let new_path = match output {
+            Some(ref o) => o,
+            None => &path,
+        };
+
         let new_path = match subfolder {
-            false => Path::new(date.year().to_string().as_str()).to_path_buf(),
-            true => Path::new(date.year().to_string().as_str()).join(date.month().to_string()),
+            false => new_path
+                .join(date.year().to_string().as_str())
+                .to_path_buf(),
+            true => new_path
+                .join(date.year().to_string().as_str())
+                .join(date.month().to_string()),
         };
 
         new_path
@@ -30,18 +45,32 @@ pub fn process_files(entries: Vec<DirEntry>, subfolder: bool) -> Result<(), std:
             .is_ok()
             .then(|| DirBuilder::new().recursive(true).create(&new_path));
 
-        rename(i.path(), &new_path.join(i.file_name())).expect("Error while moving file");
+        let new_path = &new_path.join(i.file_name());
+
+        match copy {
+            true => {
+                if !new_path.exists() {
+                    fs::copy(i.path(), &new_path).expect("Error while copying file");
+                }
+                ()
+            }
+            false => fs::rename(i.path(), &new_path).expect("Error while moving file"),
+        }
     })
 }
 
-pub fn gather_entries(path: PathBuf, recursive: bool, exts: &Vec<String>) -> Result<Vec<DirEntry>, std::io::Error> {
+pub fn gather_entries(
+    path: &PathBuf,
+    recursive: bool,
+    exts: &Vec<String>,
+) -> Result<Vec<DirEntry>, std::io::Error> {
     let mut entries = Vec::new();
-    for f in read_dir(path)? {
+    for f in read_dir(&path)? {
         let f = f?;
         if f.path().is_file() && is_photo(f.file_name().into_string().unwrap(), &exts) {
             entries.push(f);
         } else if recursive && f.path().is_dir() {
-            entries.append(&mut gather_entries(f.path(), recursive, &exts)?)            
+            entries.append(&mut gather_entries(&f.path(), recursive, &exts)?)
         }
     }
     Ok(entries)
