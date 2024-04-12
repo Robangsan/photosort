@@ -1,5 +1,8 @@
 # photosort
 
+![Static Badge](https://img.shields.io/badge/github-Robangsan%2Fphotosort-teal?style=for-the-badge&logo=github&link=https%3A%2F%2Fgithub.com%2FRobangsan%2Fphotosort)
+![GitHub License](https://img.shields.io/github/license/Robangsan/photosort?style=for-the-badge)
+
 _photosort_ is a quick tool I wrote for sorting photo and video files (although _technically_ it should be able to sort other kinds of files) into folders based on their creation date according to their EXIF data or, in its absence, the file metadata.
 
 The `photosort` command will, by default, sort all photo and video files in the current folder with these extensions:
