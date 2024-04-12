@@ -16,7 +16,14 @@ pub fn process_files(
     copy: bool,
 ) -> Result<(), std::io::Error> {
     let exif_reader = exif::Reader::new();
-    Ok(for i in entries {
+    let pb =  indicatif::ProgressBar::new(entries.len() as u64);
+
+    match copy {
+        true => println!("Copying files..."),
+        false => println!("Moving files..."),
+    }
+
+    for i in entries {
         let mut file_reader = BufReader::new(File::open(i.path())?);
         let date = match exif_reader.read_from_container(&mut file_reader) {
             Ok(e) => match e.get_field(Tag::DateTimeOriginal, In::PRIMARY) {
@@ -56,7 +63,12 @@ pub fn process_files(
             }
             false => fs::rename(i.path(), &new_path).expect("Error while moving file"),
         }
-    })
+
+        pb.inc(1);
+    };
+    pb.finish();
+    println!("Done!");
+    Ok(())
 }
 
 pub fn gather_entries(
@@ -64,6 +76,7 @@ pub fn gather_entries(
     recursive: bool,
     exts: &Vec<String>,
 ) -> Result<Vec<DirEntry>, std::io::Error> {
+    println!("Gathering files...");
     let mut entries = Vec::new();
     for f in read_dir(&path)? {
         let f = f?;
@@ -73,6 +86,7 @@ pub fn gather_entries(
             entries.append(&mut gather_entries(&f.path(), recursive, &exts)?)
         }
     }
+    println!("Found {} files to sort.", entries.len());
     Ok(entries)
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "photosort"
-version = "0.1.1"
+version = "0.1.2-alpha"
 edition = "2021"
 authors = ["Roberto Angel <thelostmushroom@gmail.com>"]
 description = "A quick tool for sorting photo/video files into folders"
@@ -9,3 +9,4 @@ description = "A quick tool for sorting photo/video files into folders"
 kamadak-exif = "0.5.5"
 chrono = "0.4.37"
 clap = { version = "4.5.4", features = ["derive"] }
+indicatif = "0.17.8"

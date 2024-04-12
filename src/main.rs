@@ -24,7 +24,9 @@ fn main() -> Result<(), std::io::Error> {
     let cli =  Cli::parse();
     let entries = gather_entries(&cli.path, cli.recursive, &cli.exts).expect("Error while reading folder");
 
-    process_files(entries, cli.subfolder, cli.path, cli.output_folder, cli.copy)?;
+    if !entries.is_empty() {
+        process_files(entries, cli.subfolder, cli.path, cli.output_folder, cli.copy)?;
+    }
 
     Ok(())
 }
