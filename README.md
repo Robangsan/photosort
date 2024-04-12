@@ -33,3 +33,19 @@ The tool will look for files only in the specified folder, unless the `-r` optio
 You can see all the available options with `photosort -h` or `photosort --help`.
 
 ### **CAUTION: This application is in alpha state and is largely UNTESTED. I'm not responsible for any data loss that may occur because of its usage. Use at your own risk!**
+
+
+#### License
+
+<sup>
+Licensed under either of <a href="LICENSE-APACHE">Apache License, Version
+2.0</a> or <a href="LICENSE-MIT">MIT license</a> at your option.
+</sup>
+
+<br>
+
+<sub>
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in this crate by you, as defined in the Apache-2.0 license, shall
+be dual licensed as above, without any additional terms or conditions.
+</sub>
