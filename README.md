@@ -5,17 +5,19 @@
 
 _photosort_ is a quick tool I wrote for sorting photo and video files (although _technically_ it should be able to sort other kinds of files) into folders based on their creation date according to their EXIF data or, in its absence, the file metadata.
 
-The `photosort` command will, by default, sort all photo and video files in the current folder with these extensions:
+The `photosort` command will, by default, sort all photo and video files in the chosen path with these extensions:
 * JPG/JPEG
 * PNG
 * TIF/TIFF
 * MP4
 * AVI
 
-The input folder can be specified by passing it as an argument:
+The input path can be specified by passing it as an argument with the `-i` option:
 ```
-photosort input_folder
+photosort -i path
 ```
+
+To sort the files in the current path, you can use `photosort -i .`
 
 These can be specified with the `-e` option, adding one for each extension. For instance:
 ```

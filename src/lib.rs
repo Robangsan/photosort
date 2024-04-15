@@ -5,6 +5,8 @@ use std::{
     time::{Duration, SystemTime},
 };
 
+use anyhow::Context;
+
 use chrono::{DateTime, Datelike, NaiveDateTime, Utc};
 use exif::{In, Tag};
 
@@ -14,7 +16,7 @@ pub fn process_files(
     path: PathBuf,
     output: Option<PathBuf>,
     copy: bool,
-) -> Result<(), std::io::Error> {
+) -> Result<(), anyhow::Error> {
     let exif_reader = exif::Reader::new();
     let pb =  indicatif::ProgressBar::new(entries.len() as u64);
 
@@ -38,13 +40,15 @@ pub fn process_files(
             None => &path,
         };
 
+        let photo_date = date?;
+
         let new_path = match subfolder {
             false => new_path
-                .join(date.year().to_string().as_str())
+                .join(photo_date.year().to_string().as_str())
                 .to_path_buf(),
             true => new_path
-                .join(date.year().to_string().as_str())
-                .join(date.month().to_string()),
+                .join(&photo_date.year().to_string().as_str())
+                .join(photo_date.month().to_string()),
         };
 
         new_path
@@ -57,11 +61,11 @@ pub fn process_files(
         match copy {
             true => {
                 if !new_path.exists() {
-                    fs::copy(i.path(), &new_path).expect("Error while copying file");
+                    fs::copy(i.path(), &new_path).context("Error while copying file")?;
                 }
                 ()
             }
-            false => fs::rename(i.path(), &new_path).expect("Error while moving file"),
+            false => fs::rename(i.path(), &new_path).context("Error while moving file")?,
         }
 
         pb.inc(1);
@@ -90,21 +94,20 @@ pub fn gather_entries(
     Ok(entries)
 }
 
-fn parse_date_from_str(strdate: &str) -> DateTime<Utc> {
-    NaiveDateTime::parse_from_str(strdate, "%Y-%m-%d %H:%M:%S")
-        .expect("Error while reading date")
-        .and_utc()
+fn parse_date_from_str(strdate: &str) -> Result<DateTime<Utc>, anyhow::Error> {
+    Ok(NaiveDateTime::parse_from_str(strdate, "%Y-%m-%d %H:%M:%S")
+        .context("Error while reading date")?
+        .and_utc())
 }
 
-fn parse_date_from_duration(duration: &Duration) -> DateTime<Utc> {
-    DateTime::from_timestamp(
-        duration
-            .as_secs()
+fn parse_date_from_duration(duration: &Duration) -> Result<DateTime<Utc>, anyhow::Error> {
+    Ok(DateTime::from_timestamp(
+        duration.as_secs()
             .try_into()
-            .expect("Error while reading date"),
+            .context("Error while reading date")?,
         0,
     )
-    .unwrap()
+    .unwrap())
 }
 
 fn is_photo(path: String, exts: &Vec<String>) -> bool {
@@ -115,15 +118,56 @@ fn is_photo(path: String, exts: &Vec<String>) -> bool {
     }
 }
 
-fn get_date_from_file(file: &DirEntry) -> DateTime<Utc> {
+fn get_date_from_file(file: &DirEntry) -> Result<DateTime<Utc>, anyhow::Error> {
     parse_date_from_duration(
         &file
             .path()
             .metadata()
-            .expect("Error while reading file metadata")
+            .context("Error while reading file metadata")?
             .created()
             .unwrap()
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap(),
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+    use chrono::{Datelike, Timelike};
+
+    use crate::{parse_date_from_duration, parse_date_from_str};
+
+    #[test]
+    fn test_parse_date_from_str() {
+        let date = parse_date_from_str("2024-04-14 22:33:44").expect("Should parse the date correctly");
+        assert_eq!(date.year(), 2024);
+        assert_eq!(date.month(), 4);
+        assert_eq!(date.day(), 14);
+        assert_eq!(date.hour(), 22);
+        assert_eq!(date.minute(),33);
+        assert_eq!(date.second(), 44);
+    }
+
+    #[test]
+    #[should_panic(expected = "Should parse the date incorrectly")]
+    fn test_parse_date_from_str_error() {
+        parse_date_from_str("2024-04-14").expect("Should parse the date incorrectly");
+    }
+
+    #[test]
+    fn test_parse_date_from_duration() {
+        let date = parse_date_from_duration(&Duration::from_millis(1713134024000)).expect("Should parse the date correctly");
+        assert_eq!(date.year(), 2024);
+        assert_eq!(date.month(), 4);
+        assert_eq!(date.day(), 14);
+        assert_eq!(date.hour(), 22);
+        assert_eq!(date.minute(),33);
+        assert_eq!(date.second(), 44);
+
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+        let now_parsed = parse_date_from_duration(&now).expect("Should parse the date correctly");
+        assert_eq!(now_parsed.timestamp() as u64, now.as_secs());        
+    }
 }

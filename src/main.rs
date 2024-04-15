@@ -2,11 +2,12 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use photosort::{gather_entries, process_files};
+use anyhow::{Context, Result};
 
 #[derive(Parser)]
 #[command(version, about="A quick tool to sort your photo/video files into folders based on their creation date", long_about="")]
 struct Cli {
-    #[arg(default_value=".", help="The path where the files to sort are located")]
+    #[arg(short='p', long="path", help="The path where the files to sort are located")]
     path: PathBuf,
     #[arg(short='o', long="output", help="Specify the output folder where the sorted folders will be created")]
     output_folder: Option<PathBuf>,
@@ -20,9 +21,9 @@ struct Cli {
     exts: Vec<String>,
 }
 
-fn main() -> Result<(), std::io::Error> {
+fn main() -> Result<(), anyhow::Error> {
     let cli =  Cli::parse();
-    let entries = gather_entries(&cli.path, cli.recursive, &cli.exts).expect("Error while reading folder");
+    let entries = gather_entries(&cli.path, cli.recursive, &cli.exts).context("Error while reading folder")?;
 
     if !entries.is_empty() {
         process_files(entries, cli.subfolder, cli.path, cli.output_folder, cli.copy)?;
