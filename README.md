@@ -1,7 +1,9 @@
 # photosort
 
-![Static Badge](https://img.shields.io/badge/github-Robangsan%2Fphotosort-teal?style=for-the-badge&logo=github&link=https%3A%2F%2Fgithub.com%2FRobangsan%2Fphotosort)
+![Static Badge](https://img.shields.io/badge/Codeberg-Robangsan-555599?style=for-the-badge&logo=codeberg&logoColor=%23eee&labelColor=%23337&link=https%3A%2F%2Fcodeberg.org%2FRobangsan%2Fphotosort)
 ![GitHub License](https://img.shields.io/github/license/Robangsan/photosort?style=for-the-badge)
+
+**NOTE: _photosort_ development has been migrated to [Codeberg](https://codeberg.org/Robangsan/photosort). Any future changes will not be reflected in this repository!**
 
 _photosort_ is a quick tool I wrote for sorting photo and video files (although _technically_ it should be able to sort other kinds of files) into folders based on their creation date according to their EXIF data or, in its absence, the file metadata.
 
